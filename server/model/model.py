@@ -4,15 +4,17 @@ import tensorflow as tf
 from PIL import Image
 import numpy as np
 
+import gdown
 import os
-import gdown  # pip install gdown
 
+MODEL_PATH = "server/my_model.keras"
+MODEL_ID = "1a6Q9dg3KKuw0QCe7cbRVon7-oyxnIpx9"  # Your Google Drive file ID
+MODEL_URL = f"https://drive.google.com/uc?id={MODEL_ID}"
 
-MODEL_PATH = "my_model.keras"
-
+# Download only if it doesn't exist
 if not os.path.exists(MODEL_PATH):
-    # Download from Google Drive once when the server starts
-    gdown.download("https://drive.google.com/file/d/1a6Q9dg3KKuw0QCe7cbRVon7-oyxnIpx9/view?usp=drive_link", MODEL_PATH, quiet=False)
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+
 
 
 
