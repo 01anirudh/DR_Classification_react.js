@@ -4,6 +4,19 @@ import tensorflow as tf
 from PIL import Image
 import numpy as np
 
+import os
+import gdown  # pip install gdown
+
+
+MODEL_PATH = "my_model.keras"
+
+if not os.path.exists(MODEL_PATH):
+    # Download from Google Drive once when the server starts
+    gdown.download("https://drive.google.com/file/d/1a6Q9dg3KKuw0QCe7cbRVon7-oyxnIpx9/view?usp=drive_link", MODEL_PATH, quiet=False)
+
+
+
+
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
 
@@ -12,7 +25,7 @@ def home():
     return jsonify({"message": "Retinopathy API running"})
 
 # Load model
-model = tf.keras.models.load_model('./my_model.keras')
+model = tf.keras.models.load_model(MODEL_PATH)
 class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
 
 def preprocess_image(image):
