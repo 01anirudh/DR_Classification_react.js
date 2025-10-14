@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: retinopathy-backend
+    env: python
+    plan: free
+    region: singapore
+    buildCommand: "pip install -r server/requirements.txt"
+    startCommand: "gunicorn app:app"
+    workingDirectory: server
+    autoDeploy: true
+
+  - type: web
+    name: retinopathy-frontend
+    env: static
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: client/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://retinopathy-backend.onrender.com

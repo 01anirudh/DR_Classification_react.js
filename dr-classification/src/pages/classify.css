@@ -1,0 +1,187 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+/* Full page background */
+body, html {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+ 
+    background-image: url('../assets/medical-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* stays fixed on scroll */
+    background-repeat: no-repeat;
+}
+
+
+
+
+/* Container styling */
+.classifier-container {
+    width: 450px;
+    padding: 30px 25px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.85); /* semi-transparent to show background */
+    box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.classifier-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Make text readable on medical background */
+h2, .prediction-result h3, .prediction-result p, .file-input {
+    color: #003366; /* dark blue for contrast */
+}
+
+.error-text {
+    color: #ff4d4f; /* red for errors */
+}
+
+
+/* File input */
+.file-input {
+    margin: 20px 0;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px dashed #007bff;
+    background-color: #f0f8ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-input:hover {
+    border-color: #0056b3;
+    background-color: #e6f2ff;
+}
+
+/* Button styling */
+.upload-button {
+    padding: 12px 25px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.upload-button:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.upload-button:disabled {
+    background-color: #7aa7e9;
+    cursor: not-allowed;
+}
+
+/* Error message */
+.error-text {
+    color: #ff4d4f;
+    margin-top: 15px;
+    font-weight: 500;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Prediction box */
+.prediction-result {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #d1f7dc, #e0f7fa);
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    animation: spin 1s linear infinite;
+    box-shadow: 0px 0px 10px rgba(0,123,255,0.3);
+}
+
+/* Headings */
+h2 {
+    color: #0056b3;  /* Deep blue matching the border */
+    margin-bottom: 25px;
+    font-size: 28px;
+}
+
+.prediction-result h3 {
+    color: #007bff; /* Bright blue for result header */
+    margin-bottom: 15px;
+}
+
+.prediction-result p {
+    color: #003366; /* Darker text for better contrast */
+    font-weight: 500;
+}
+
+/* File input */
+.file-input {
+    color: #0056b3;  /* Match border */
+}
+
+/* Button */
+.upload-button {
+    color: white; /* stays visible on blue background */
+}
+
+/* Error message */
+.error-text {
+    color: #ff4d4f; /* Red stays for errors */
+}
+
+/* Optional: general text inside container */
+.classifier-container {
+    color: #003366; /* Ensures default text is visible */
+}
+.image-preview {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+    margin-top: 10px;
+}
+
+
+/* Animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
