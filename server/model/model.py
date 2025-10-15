@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 # Path to local model file
-MODEL_PATH = "server/my_model.keras"
+MODEL_PATH = "server/my_model.tflite"
 
 # Initialize Flask app
 app = Flask(__name__)
