@@ -3,12 +3,10 @@ from flask_cors import CORS
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-import gdown
 import os
 
+# Path to local model file
 MODEL_PATH = "server/my_model.keras"
-MODEL_ID = "1a6Q9dg3KKuw0QCe7cbRVon7-oyxnIpx9"  # Your Google Drive file ID
-MODEL_URL = f"https://drive.google.com/uc?id={MODEL_ID}"
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -19,47 +17,43 @@ model = None
 class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
 
 def load_model():
-    """Load the model - called at module import time"""
+    """Load the model lazily on first request (fork-safe)"""
     global model
     
-    try:
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-        
-        # Download only if file doesn't exist
-        if not os.path.exists(MODEL_PATH):
-            app.logger.info("Downloading model from Google Drive...")
-            gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
-        
-        # Load the model
-        app.logger.info("Loading model...")
-        model = tf.keras.models.load_model(MODEL_PATH)
-        app.logger.info("Model loaded successfully!")
-        
-    except Exception as e:
-        app.logger.error(f"Error loading model: {e}")
-        raise
-
-# Load model when module is imported (works with gunicorn)
-load_model()
+    if model is None:
+        try:
+            app.logger.info("Loading model in worker process...")
+            
+            if not os.path.exists(MODEL_PATH):
+                raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+            
+            model = tf.keras.models.load_model(MODEL_PATH)
+            app.logger.info("Model loaded successfully!")
+        except Exception as e:
+            app.logger.error(f"Error loading model: {e}")
+            raise
+    
+    return model
 
 @app.route('/')
 def home():
     return jsonify({"message": "Retinopathy API running"})
 
+@app.route('/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({"status": "healthy"}), 200
+
 def preprocess_image(image):
+    """Preprocess image for model prediction"""
     image = image.resize((224, 224))
     image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
-    return image
+    return image.astype(np.float32)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Check if model is loaded
-    if model is None:
-        app.logger.error("Model not loaded")
-        return jsonify({'error': 'Model not loaded'}), 500
-    
+    """Prediction endpoint"""
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     
@@ -68,22 +62,39 @@ def predict():
         return jsonify({'error': 'No selected file'}), 400
     
     try:
+        # Load model lazily (only in the worker that handles request)
+        current_model = load_model()
+        
         app.logger.info(f"Processing prediction for file: {file.filename}")
+        
+        # Read the image from stream
         image = Image.open(file.stream)
+        
+        # Convert to RGB if needed
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
         processed_image = preprocess_image(image)
-        predictions = model.predict(processed_image)
+        
+        # Run prediction
+        predictions = current_model.predict(processed_image, verbose=0)
         predicted_class_index = int(np.argmax(predictions[0]))
         predicted_class_name = class_names[predicted_class_index]
         confidence = float(predictions[0][predicted_class_index])
         
-        app.logger.info(f"Prediction: {predicted_class_name}, Confidence: {confidence}")
+        app.logger.info(f"Prediction: {predicted_class_name}, Confidence: {confidence:.2f}")
         
         return jsonify({
             'predicted_stage': predicted_class_name,
-            'confidence': confidence
+            'confidence': confidence,
+            'all_probabilities': {
+                class_names[i]: float(predictions[0][i]) 
+                for i in range(len(class_names))
+            }
         })
+        
     except Exception as e:
-        app.logger.error(f"Error during prediction: {str(e)}")
+        app.logger.error(f"Error during prediction: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 # Only for local development
