@@ -42,7 +42,7 @@ function RetinopathyClassifier() {
 
         try {
             const response = await axios.post(
-                'https://retinascan-backend.onrender.com/predict',
+                'https://dr-classification-react-js-7.onrender.com/predict',
                 formData,
                 { headers: { 'Content-Type': 'multipart/form-data' } }
             );
